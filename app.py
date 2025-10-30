@@ -1,22 +1,21 @@
 import streamlit as st
 from transformers import pipeline
 
-# Title
-st.title("🤖 AI ChatGPT-Like Chatbot")
+# ✅ Initialize chatbot safely for Python 3.13 + torch 2.6+
+chatbot = pipeline(
+    "text-generation",
+    model="gpt2",
+    device_map=None,       # disables meta tensor issue
+    torch_dtype="float32"  # fixes dtype compatibility
+)
 
-# Load models
-sentiment_analyzer = pipeline("sentiment-analysis")
-chatbot = pipeline("text-generation", model="gpt2")
+# Streamlit UI
+st.title("🤖 AI Conversational Chatbot (Revanth Reddy)")
 
-# User input
+# Text input
 user_input = st.text_input("You:", "")
 
-# Generate response
-if st.button("Send") and user_input:
-    sentiment = sentiment_analyzer(user_input)[0]['label']
-    response = chatbot(f"{user_input}. Sentiment: {sentiment}. Response:",
-                       max_length=80,
-                       num_return_sequences=1,
-                       do_sample=True,
-                       temperature=0.7)[0]['generated_text']
-    st.write("**AI:**", response)
+if user_input:
+    with st.spinner("Thinking..."):
+        response = chatbot(user_input, max_length=100, num_return_sequences=1)
+        st.write("**Bot:**", response[0]['generated_text'])
